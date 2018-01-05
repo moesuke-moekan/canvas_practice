@@ -59,11 +59,11 @@
 
         // クリックイベント
         self.canvas.addEventListener('mousedown', function(evt) {
-            ctx.moveTo(evt.pageX, evt.pageY);
-            canvas.addEventListener('mousemove', setDraw, false);
+            self.ctx.moveTo(evt.pageX, evt.pageY);
+            self.canvas.addEventListener('mousemove', setDraw, false);
         }, false);
         self.canvas.addEventListener('mouseup', function() {
-            canvas.removeEventListener('mousemove', setDraw, false);
+            self.canvas.removeEventListener('mousemove', setDraw, false);
         }, false);
 
         // 描画する

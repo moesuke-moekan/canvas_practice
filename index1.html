@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Title</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+        }
+        canvas {
+            vertical-align: middle;
+        }
+        textarea {
+            font-size: 16px;
+        }
+    </style>
+</head>
+<body>
+
+<canvas id="sample"></canvas>
+<div class="ctrl_box">
+    <p><textarea name="input_text" id="input_text" cols="30" rows="10"></textarea></p>
+    <p><button id="save">画像を保存</button></p>
+</div>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        var canvasImage = new CanvasImage();
+        canvasImage.init();
+    }, false);
+
+    /**
+     * 画像の加工
+     * @constructor
+     */
+    var CanvasImage = function() {
+        this.canvas = document.getElementById('sample');
+    };
+
+    CanvasImage.prototype.init = function() {
+        var self = this;
+
+        self.canvas.width = window.innerWidth;
+        self.canvas.height = window.innerHeight;
+
+        self.ctx = self.canvas.getContext('2d');
+
+        self.setImage(function(drawImage) {
+            self.ctx.font = '30px serif';
+
+            self.setUserEvent();
+        });
+    };
+
+    CanvasImage.prototype.setImage = function(callbackFunc) {
+        var self = this;
+
+        self.img = document.createElement('img');
+        self.img.addEventListener('load', function() {
+            self.myDrawImage();
+            callbackFunc(function() {
+                self.myDrawImage();
+            });
+        }, false);
+        self.img.src = 'img/sample1.jpg';
+    };
+
+    CanvasImage.prototype.myDrawImage = function() {
+        var self = this;
+
+        var imgRatioW = self.img.naturalWidth / window.innerWidth;
+        var imgRatioH = self.img.naturalHeight / window.innerHeight;
+        var imgRatio = Math.min(imgRatioW, imgRatioH);
+        self.ctx.drawImage(self.img, 0, 0, self.img.naturalWidth / imgRatio, self.img.naturalHeight / imgRatio);
+    };
+
+    CanvasImage.prototype.setUserEvent = function() {
+        var self = this;
+
+        var textArea = document.getElementById('input_text');
+        var saveBtn = document.getElementById('save');
+
+        // テキストの座標
+        var currentX = 100,
+            currentY = 500;
+
+        // テキスト入力
+        textArea.addEventListener('keydown', function() {
+            var id = setTimeout(function() {
+                clearTimeout(id);
+                var msg = textArea.value;
+                self.ctx.clearRect(0, 0, self.canvas.width, self.canvas.height);
+                self.myDrawImage();
+                self.ctx.fillText(msg, currentX, currentY);
+            }, 100);
+        }, false);
+
+        // ドラッグ中かどうか
+        var isDragging = false;
+        var mouseX, mouseY, tmpX, tmpY;
+
+        self.canvas.addEventListener('mousedown', function(evt) {
+            isDragging = true;
+
+            mouseX = evt.pageX;
+            mouseY = evt.pageY;
+        }, false);
+
+        self.canvas.addEventListener('mousemove', function(evt) {
+            if (!isDragging) {
+                return;
+            }
+
+            var moveX = mouseX - evt.pageX;
+            var moveY = mouseY - evt.pageY;
+            tmpX = currentX;
+            tmpY = currentY;
+            tmpX -= moveX;
+            tmpY -= moveY;
+
+            // 再描画
+            var msg = textArea.value;
+            self.ctx.clearRect(0, 0, self.canvas.width, self.canvas.height);
+            self.myDrawImage();
+            self.ctx.fillText(msg, tmpX, tmpY);
+        }, false);
+
+        self.canvas.addEventListener('mouseup', function() {
+            isDragging = false;
+            currentX = tmpX;
+            currentY = tmpY;
+        }, false);
+
+        // 保存ボタンクリック
+        saveBtn.addEventListener('click', function() {
+            var base64Data = self.canvas.toDataURL('image/png');
+
+            var newImg = document.createElement('img');
+            newImg.src = base64Data;
+            var body = document.getElementsByTagName('body')[0];
+            body.appendChild(newImg);
+        }, false);
+    };
+</script>
+</body>
+</html>
