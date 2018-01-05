@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>お絵かき</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+        }
+        canvas {
+            vertical-align: middle;
+        }
+        .btns {
+            position: fixed;
+            bottom: 10px;
+            left: 10px;
+        }
+    </style>
+</head>
+<body>
+
+<canvas id="sample"></canvas>
+<div class="btns"><button id="black_btn">黒</button> <button id="red_btn">赤</button> <button id="green_btn">緑</button> <button id="blue_btn">青</button></div>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        var drawing = new Drawing();
+        drawing.init();
+    }, false);
+
+    window.addEventListener('touchmove', function(evt) {
+        evt.preventDefault();
+    }, false);
+
+    /**
+     * お絵かき
+     * @constructor
+     */
+    var Drawing = function() {
+        this.canvas = document.getElementById('sample');
+    };
+
+    Drawing.prototype.init = function() {
+        this.canvas.width = window.innerWidth;
+        this.canvas.height = window.innerHeight;
+        this.ctx = this.canvas.getContext('2d');
+
+        // パスを新規作成
+        this.ctx.beginPath();
+
+        this.setEvent();
+        this.setChangeColor();
+    };
+
+    Drawing.prototype.setEvent = function() {
+        var self = this;
+
+        // クリックイベント
+        self.canvas.addEventListener('mousedown', function(evt) {
+            ctx.moveTo(evt.pageX, evt.pageY);
+            canvas.addEventListener('mousemove', setDraw, false);
+        }, false);
+        self.canvas.addEventListener('mouseup', function() {
+            canvas.removeEventListener('mousemove', setDraw, false);
+        }, false);
+
+        // 描画する
+        function setDraw(evt) {
+            self.ctx.lineTo(evt.pageX, evt.pageY);
+            self.ctx.stroke();
+        }
+
+        // タッチイベント
+        this.canvas.addEventListener('touchstart', function(evt) {
+            var touchList = evt.changedTouches[0];
+            self.ctx.moveTo(touchList.pageX, touchList.pageY);
+        }, false);
+        this.canvas.addEventListener('touchmove', function(evt) {
+            var touchList = evt.changedTouches[0];
+            self.ctx.lineTo(touchList.pageX, touchList.pageY);
+            self.ctx.stroke();
+        }, false);
+    };
+
+    Drawing.prototype.setChangeColor = function() {
+        var self = this;
+
+        // ボタンたち
+        var blackBtn = document.getElementById('black_btn');
+        var redBtn = document.getElementById('red_btn');
+        var greenBtn = document.getElementById('green_btn');
+        var blueBtn = document.getElementById('blue_btn');
+
+        // 線の色を変更
+        blackBtn.addEventListener('click', function(evt) {
+            changeColor('black');
+        }, false);
+        redBtn.addEventListener('click', function(evt) {
+            changeColor('red');
+        }, false);
+        greenBtn.addEventListener('click', function(evt) {
+            changeColor('green');
+        }, false);
+        blueBtn.addEventListener('click', function(evt) {
+            changeColor('blue');
+        }, false);
+        
+        function changeColor(colorName) {
+            self.ctx.closePath();
+            self.ctx.beginPath();
+            self.ctx.strokeStyle = colorName;
+        }
+    };
+</script>
+</body>
+</html>
